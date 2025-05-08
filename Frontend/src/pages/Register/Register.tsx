@@ -52,7 +52,7 @@ const Register = () => {
     );
 
     if (response) {
-      navigate("/api/v1/user/login");
+      navigate("/login");
     }
   };
 
@@ -106,7 +106,7 @@ const Register = () => {
           onChange={(e) => setPassword(e.target.value)}
         />
 
-        <Link to="/api/v1/user/login">
+        <Link to="/login">
           <Typography style={{color:'black'}}>Already Signed Up? Login Now</Typography>
         </Link>
 

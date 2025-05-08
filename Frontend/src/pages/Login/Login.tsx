@@ -61,7 +61,7 @@ const Login = () => {
 
         <Button type='submit' style={{color: 'skyBlue'}} >Login</Button>
 
-        <Link to="/api/v1/user/register">
+        <Link to="/register">
             <Typography style={{color: 'black'}}>New User?</Typography>
         </Link>
 

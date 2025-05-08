@@ -11,7 +11,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
   if (loading) return <div>Loading...</div>; // You can show a spinner here
 
-  if (!isAuthenticated) return <Navigate to="/api/v1/user/login" />;
+  if (!isAuthenticated) return <Navigate to="/login" />;
 
   return <>{children}</>;
 };
