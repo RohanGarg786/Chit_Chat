@@ -10,7 +10,7 @@ const AllContacts: React.FC<AllContactProps> = ({user, setIsAllContact, setSelec
   useEffect(() => {
     const fetchContacts = async () => {
       try {
-        const result = await axios.get(`http://localhost:8000/api/v1/user/allContacts/${user?.id}`, {
+        const result = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/v1/user/allContacts/${user?.id}`, {
           headers: {
             "Content-Type": "application/json",
           },
@@ -32,7 +32,7 @@ const AllContacts: React.FC<AllContactProps> = ({user, setIsAllContact, setSelec
   }
 
   const handleContactDelete = async (contact: Contact) => {
-    await axios.delete(`http://localhost:8000/api/v1/user/deleteContact/${contact?.id}`,{
+    await axios.delete(`${import.meta.env.VITE_BACKEND_URL}/api/v1/user/deleteContact/${contact?.id}`,{
       headers: {
         "Content-Type": "application/json",
       },

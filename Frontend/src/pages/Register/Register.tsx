@@ -42,7 +42,7 @@ const Register = () => {
   const submitHandler = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const response = await axios.post(
-      "http://localhost:8000/api/v1/user/register",
+      `${import.meta.env.VITE_BACKEND_URL}/api/v1/user/register`,
       { name, phone, password, avatar },
       {
         headers: {

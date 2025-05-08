@@ -11,7 +11,7 @@ const AddNewContact: React.FC<AddNewContactProps> = ( {user,setIsOpen} ) => {
   const userId = user?.id
   const handleAddNewContact = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    const addContact = await  axios.post(`http://localhost:8000/api/v1/user/addNewContact/${userId}`,{phone,name},{
+    const addContact = await  axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/user/addNewContact/${userId}`,{phone,name},{
       headers:{
           'Content-Type':'application/json'
       },

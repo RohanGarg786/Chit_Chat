@@ -55,7 +55,7 @@ const Home = () => {
 
   useEffect(() => {
     // Initialize socket only once
-    socket.current = io("http://localhost:8000");
+    socket.current = io(`${import.meta.env.VITE_BACKEND_URL}`);
 
     return () => {
       // Clean up socket connection when component unmounts
@@ -145,7 +145,7 @@ const Home = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const data = await axios.get("http://localhost:8000/api/v1/user", {
+      const data = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/v1/user`, {
         headers: {
           "Content-Type": "application/json",
         },
@@ -160,7 +160,7 @@ const Home = () => {
     if (user) {
       const fetchContacts = async () => {
         const result = await axios.get(
-          `http://localhost:8000/api/v1/user/allContacts/${user?.id}`
+          `${import.meta.env.VITE_BACKEND_URL}/api/v1/user/allContacts/${user?.id}`
         );
 
         if (result) {
@@ -177,7 +177,7 @@ const Home = () => {
     if (user && selectedContact) {
       const fetchData = async () => {
         const result = await axios.get(
-          `http://localhost:8000/api/v1/user/allMessages/${user?.id}/${selectedContact?.contactId}`
+          `${import.meta.env.VITE_BACKEND_URL}/api/v1/user/allMessages/${user?.id}/${selectedContact?.contactId}`
         );
 
         if (result) {

@@ -20,7 +20,7 @@ const Login = () => {
 
     const loginHandler = async (e: FormEvent<HTMLFormElement>)=>{
         e.preventDefault();
-       const response =  await axios.post('http://localhost:8000/api/v1/user/login',{phone,password},{
+       const response =  await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/user/login`,{phone,password},{
             headers:{
                 'Content-Type':'application/json'
             },

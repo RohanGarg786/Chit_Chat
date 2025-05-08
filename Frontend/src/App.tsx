@@ -1,5 +1,5 @@
 import React, { useContext } from 'react'
-import { Route,BrowserRouter as Router , Routes } from 'react-router-dom'
+import { Navigate, Route,BrowserRouter as Router , Routes } from 'react-router-dom'
 import Register from './pages/Register/Register'
 import Login from './pages/Login/Login'
 import './App.css'
@@ -8,6 +8,7 @@ import 'regenerator-runtime/runtime'
 import { GlobalStateContext } from './components/ContextApi/GlobalStateProvide'
 // import AddNewContact from './pages/AddNewContact/AddNewContact'
 import Home from './pages/Home/Home'
+import ProtectedRoute from './components/Routes/ProtectedRoute'
 
 const App : React.FC = () => {
 
@@ -18,20 +19,35 @@ const App : React.FC = () => {
       throw new Error("useGlobalState must be used within a GlobalStateProvider");
   }
 
-  const {isAuthenticated} = context;
+  // const {isAuthenticated, loading} = context;
 
+  // if (loading) {
+  //   return <LoadingSpinner />; // or a blank screen, loader, etc.
+  // }
+  
+  // if (!isAuthenticated) {
+  //   return <Navigate to="/login" />;
+  // }
   return (
     <>    
-     <Router>
-     <Routes>
-      <Route path='/api/v1/user' element={isAuthenticated ? <Home/> : <Login/>}></Route>
-      <Route path="/api/v1/user/register" element={<Register/>} ></Route>
-      <Route path="/api/v1/user/login" element={<Login/>} ></Route>
-      {/* <Route path='/api/v1/user/AddNewContact' element={<AddNewContact/>}></Route> */}
-      </Routes>
-     </Router>
     
+     
+     <Router>
+      <Routes>
+        <Route path="/api/v1/user/login" element={<Login />} />
+        <Route path="/api/v1/user/register" element={<Register />} />
+        
+        {/* 🔐 Protect this route */}
+        <Route path="/api/v1/user" element={
+          <ProtectedRoute>
+            <Home />
+          </ProtectedRoute>
+        } />
 
+        {/* Add more protected routes here */}
+      </Routes>
+    </Router>
+     
     </>
   )
 }
