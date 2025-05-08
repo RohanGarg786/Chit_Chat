@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken'
 
-const JWT_SECRET = "12345678"
+const JWT_SECRET =process.env.JWT_SECRET!
 export const createToken = async (phone:string)=>{
 
     const token = jwt.sign(phone,JWT_SECRET);

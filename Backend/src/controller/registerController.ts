@@ -3,6 +3,7 @@ import { userSchemaValidation } from "../validations/userValidation";
 import { prisma } from "../database/db";
 import { createToken, verifyToken } from "../service/authentication";
 import bcrypt from 'bcrypt'
+import jwt from 'jsonwebtoken'
 
 export const registerUserController = async (req: Request, res: Response): Promise<any>=>{
    try {
@@ -87,9 +88,12 @@ export const loginUserController = async(req:Request, res: Response): Promise<an
         }
 
         const token = await createToken(data.phone);
-        const options ={
-            expires:new Date(Date.now()+1*24*60*60*1000),
-        };
+        const options = {
+            httpOnly: true,                     // Not accessible via JS (more secure)
+            secure: true,                       // Only sent over HTTPS (Render uses HTTPS)
+            sameSite: 'none' as const, // ✅ lowercase 'none'
+            expires: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000), // 1 day
+          };
 
         return res.status(201).cookie("token",token,options).json({
             success:true,
@@ -258,3 +262,15 @@ export const deleteContact = async (req: any, res: any) => {
         })
     }
 }
+
+export const checkAuthentication = async (req: any, res: any) => {
+    const token = req.cookies.token;
+    if (!token) return res.status(401).json({ error: 'Unauthorized' });
+  
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET!);
+      res.status(200).json({ user: decoded });
+    } catch (err) {
+      res.status(401).json({ error: 'Invalid token' });
+    }
+  }

@@ -5,6 +5,8 @@ import {Server} from 'socket.io';
 import userRouter from './routes/userRoutes';
 import cookieParser from 'cookie-parser'
 import { prisma } from './database/db';
+import dotenv from 'dotenv';
+dotenv.config();
 
 const app = express();
 
