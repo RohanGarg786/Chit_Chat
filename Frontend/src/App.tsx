@@ -34,11 +34,11 @@ const App : React.FC = () => {
      
      <Router>
       <Routes>
-        <Route path="/api/v1/user/login" element={<Login />} />
-        <Route path="/api/v1/user/register" element={<Register />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
         
         {/* 🔐 Protect this route */}
-        <Route path="/api/v1/user" element={
+        <Route path="/" element={
           <ProtectedRoute>
             <Home />
           </ProtectedRoute>
