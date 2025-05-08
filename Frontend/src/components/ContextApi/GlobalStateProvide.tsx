@@ -25,6 +25,7 @@ export const GlobalStateProvider: React.FC<GlobalStateProviderProps>  = ({ child
 
   const login = (token: any) => {
     setIsAuthenticated(true);
+    console.log("Login successful, token:", token);
   };
 
   const logout = () => {

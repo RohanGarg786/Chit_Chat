@@ -1,5 +1,5 @@
 import React, { useContext } from 'react'
-import { Navigate, Route,BrowserRouter as Router , Routes } from 'react-router-dom'
+import {  Route,BrowserRouter as Router , Routes } from 'react-router-dom'
 import Register from './pages/Register/Register'
 import Login from './pages/Login/Login'
 import './App.css'
