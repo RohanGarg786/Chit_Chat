@@ -34,7 +34,7 @@ const Login = () => {
             // Set the token in cookies for future requests
            await setIsAuthenticated(true); // Update your authentication state
             // Redirect the user to the home page
-            navigate('/api/v1/user') // Adjust according to your routing library
+            navigate('/') // Adjust according to your routing library
         }
 
     }
