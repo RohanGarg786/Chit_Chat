@@ -1,0 +1,65 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String         @id @default(auto()) @map("_id") @db.ObjectId // Use String for MongoDB ObjectId
+  name         String
+  password     String         @unique
+  phone        String         @unique
+  avatar       String?
+  userContacts UserContacts[]
+  meassages    meassages[]
+}
+
+model UserContacts {
+  id          String      @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  phoneNumber String      @unique
+  User        User?       @relation(fields: [userId], references: [id])
+  contactId   String?     @db.ObjectId
+  userId      String?     @db.ObjectId
+  message     meassages[]
+}
+
+model meassages {
+  id           String        @id @default(auto()) @map("_id") @db.ObjectId
+  senderId     String        @db.ObjectId
+  receiverId   String        @db.ObjectId
+  content      String[]
+  timestamp    DateTime      @default(now())
+  read         Boolean       @default(false)
+  UserContacts UserContacts? @relation(fields: [receiverId], references: [id])
+  user         User?         @relation(fields: [senderId], references: [id])
+}
+
+model Chats {
+  id          String     @id @default(auto()) @map("_id") @db.ObjectId
+  memebers    String[]
+  messages    Messages[]
+  createdAt   DateTime       @default(now())
+  isGroupChat Boolean  @default(false)
+}
+
+model Messages {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  senderId   String   @db.ObjectId
+  receiverId String   @db.ObjectId
+  content    String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt()
+  isRead     Boolean  @default(false)
+  chats      Chats?   @relation(fields: [chatsId], references: [id])
+  chatsId    String?  @db.ObjectId
+}

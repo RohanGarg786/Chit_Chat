@@ -1,0 +1,315 @@
+.home {
+  display: flex;
+  flex-direction: row;
+  height: 100vh;
+}
+
+.homeleft {
+  width: 39.5%;
+  height: 100vh;
+  background-color: #f3eded;
+  position: absolute;
+  left: 0;
+  padding-left: 0.5%;
+}
+
+.homeleft .leftUpperPanel {
+  height: 9vh;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.leftUpperPanel h2 {
+  margin: 0 3vw;
+}
+
+.leftUpperPanel .sidebar {
+  margin: 0 1vw;
+  display: flex;
+}
+
+.leftUpperPanel .sidebar .add {
+  margin-right: 3vw;
+}
+
+.homeleft .leftSearch {
+  height: 7vh;
+}
+
+.homeleft .leftSearch input {
+  margin: 5px;
+  width: 30vw;
+  border-radius: 5px;
+  height: 4vh;
+  border: none;
+  padding: 5px 10px;
+  background-color: rgb(198, 210, 203);
+  z-index: 0;
+}
+
+.leftFilter {
+  height: 7vh;
+  display: flex;
+  /* justify-content: center; */
+  align-items: center;
+}
+
+.leftFilter p {
+  background-color: rgb(198, 210, 203);
+  margin: 0 0.2vw;
+  border-radius: 20px;
+  color: rgb(105, 104, 104);
+  padding: 10px;
+}
+
+.leftBottomPanel {
+  /* background-color: red; */
+  height: 75vh;
+}
+
+.contactList {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin: 10px;
+  background-color: rgb(181, 168, 168);
+  border-radius: 10px;
+  padding: 6px;
+}
+
+.contactListDp {
+  /* margin-right: 20px; */
+  margin: 0 20px 0 10px;
+}
+.contactListName {
+  font-family: Arial, Helvetica, sans-serif;
+  font-weight: 600;
+  color: rgb(58, 54, 54);
+}
+
+.contactListEmoji {
+  /* margin-left: 10px; */
+  position: absolute;
+  right: 40px;
+}
+
+.homeright {
+  width: 60%;
+  height: 100vh;
+  position: absolute;
+  right: 0;
+  /* margin-right: 10px; */
+}
+
+.upperPanel {
+  display: flex;
+  flex-direction: row;
+  background-color: rgb(198, 210, 203);
+  justify-content: space-between;
+  /* height: 4%; */
+  height: 7vh;
+  width: 97.5%;
+  /* padding: 1%; */
+  padding: 1vh
+}
+
+.upperPanelLeft {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  width: 11%;
+  /* box-sizing: border-box; */
+}
+.upperPanelRight {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  /* width: 20vw; */
+}
+
+.upperPanelRight h3 {
+  color: rgb(62, 59, 59);
+  margin-left: 10px;
+}
+
+.rightMiddlePanel {
+  /* height: 83.1%; */
+  height: 83vh;
+  position: relative;
+  width: 97%;
+  background-image: url(https://i.pinimg.com/736x/8c/98/99/8c98994518b575bfd8c949e91d20548b.jpg);
+  /* padding: 1%; */
+  padding: 1vh;
+  overflow-y: scroll;
+  display: flex;
+  flex-direction: column;
+  z-index: 0
+}
+
+.emojiPicker {
+  position: fixed;
+  bottom: 45px;
+  z-index: 10;
+}
+
+.msgss{
+  list-style: none; /* Remove list dots */
+  margin: 0; /* Reset margins */
+  padding: 0; /* Reset padding */
+  display: flex; /* Enable alignment for list items */
+  flex-direction: column; /* Stack messages vertically */
+  gap: 8px; /* Add spacing between messages */
+}
+.sender{
+  align-self: flex-end; /* Align sender messages to the right */
+  background-color: #d1f7c4; /* Light green for sender messages */
+  padding: 10px 15px; /* Add some padding for better visibility */
+  border-radius: 10px; /* Rounded corners */
+  max-width: 60%; /* Limit message width */
+  word-wrap: break-word; /* Handle long words */
+  font-family: Helvetica, sans-serif;
+  color: rgb(31, 31, 31);
+}
+
+.receiver{
+  align-self: flex-start; /* Align receiver messages to the left */
+  background-color: #ece2d7; /* Light gray for receiver messages */
+  padding: 10px 15px; /* Add padding for visibility */
+  border-radius: 10px; /* Rounded corners */
+  max-width: 60%; /* Limit message width */
+  word-wrap: break-word; /* Handle long words */
+  font-family: Helvetica, sans-serif;
+  color: rgb(31, 31, 31);
+}
+
+.messageTime{
+  font-size: 11px;
+  margin-left: 5px;
+  
+}
+
+/* .sender li {
+  background-color: rgb(198, 210, 203);
+  margin: 2px;
+  border-radius: 10px;
+  padding: 7px;
+  list-style-type: none;
+  align-self: flex-end;
+}
+
+.receiver li {
+  background-color: rgb(163, 242, 196);
+  margin: 2px;
+  list-style-type: none;
+  left: 0px;
+  border-radius: 10px;
+  padding: 7px;
+  right: 30px;
+  align-self: flex-start;
+} */
+
+.MoreVertIcon {
+  position: relative;
+  display: inline-block;
+}
+.vertIconSelectBox {
+  position: absolute;
+  width: 150px;
+  z-index: 100;
+  border: 1px solid #ddd;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  border-radius: 10px;
+  top: 30px;
+  right: 0;
+  background-color: #faf7f7;
+  color: black;
+  padding: 10px;
+  align-items: center;
+  justify-content: center;
+}
+
+.vertIconItems {
+    margin:10px;
+    padding: 6px;
+    border-radius: 10px;
+    cursor: pointer;
+}
+.vertIconItems:hover {
+    background-color: #f0f0f0;
+}
+.rightBottomPanel {
+  background-color: rgb(198, 210, 203);
+  width: 100%;
+  margin-bottom: 0px;
+  /* height: 7.5%; */
+  height: 6vh;
+  display: flex;
+  justify-content: space-between;
+}
+
+.rightBottomPanel .icons {
+  display: flex;
+}
+
+.rightBottomPanel .InsertEmoticonIcon {
+  margin: 1.3vh 0 1.3vh 1.5vw;
+}
+
+.rightBottomPanel .AddIcon {
+  margin: 1.3vh 1.5vw 1.3vh 1vw;
+}
+
+.rightBottomPanel .MicIcon,
+.SendIcon {
+  margin: 1.3vh 1.5vw;
+}
+
+.rightBottomPanel input {
+  margin: 1vh 0;
+  width: 50vw;
+  border-radius: 10px;
+  border: none;
+  padding: 10px;
+}
+
+.AddNewContact {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  width: 50vw;
+  height: 60vh;
+  z-index: 300;
+  border: 1px solid #ddd;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  border-radius: 10px;
+  top: 90px;
+  left: 50% ;
+  background-color: #b9afaf7a;
+  color: black;
+  padding: 10px;
+  align-items: center;
+  justify-content: center;
+}
+
+.AllContacts {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  width: 50vw;
+  height: 60vh;
+  z-index: 300;
+  border: 1px solid #ddd;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  border-radius: 10px;
+  top: 90px;
+  left: 50% ;
+  background-color: whitesmoke;
+  overflow: scroll;
+  color: black;
+  padding: 10px;
+  align-items: center;
+  justify-content: center;
+}
