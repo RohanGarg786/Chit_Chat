@@ -393,9 +393,14 @@
 
 /* Message Input Area */
 .rightBottomPanel {
-  padding: 8px 16px;
-  background-color: var(--background-white);
-  border-top: 1px solid var(--border-color);
+ position: fixed;
+  bottom: 0;
+  width: 100%;
+  background-color: white;
+  padding: 12px;
+  padding-bottom: calc(12px + env(safe-area-inset-bottom)); /* Adjusts for devices with home gesture bar */
+  box-shadow: 0 -2px 6px rgba(0,0,0,0.1);
+  z-index: 999; /* Ensure it's above other content */
 }
 
 .message-input-container {
