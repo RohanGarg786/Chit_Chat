@@ -3,6 +3,7 @@ import './AllContacts.css'
 import axios from 'axios'
 import DeleteIcon from '@mui/icons-material/Delete';
 import { AllContactProps, Contact } from '../../Interface/contactInterface/NewContactInterface';
+import toast from 'react-hot-toast';
 
 const AllContacts: React.FC<AllContactProps> = ({user, setIsAllContact, setSelectedContact}) => {
     
@@ -32,35 +33,45 @@ const AllContacts: React.FC<AllContactProps> = ({user, setIsAllContact, setSelec
   }
 
   const handleContactDelete = async (contact: Contact) => {
-    await axios.delete(`${import.meta.env.VITE_BACKEND_URL}/api/v1/user/deleteContact/${contact?.id}`,{
+    const contactDeleted = await axios.delete(`${import.meta.env.VITE_BACKEND_URL}/api/v1/user/deleteContact/${contact?.id}`,{
       headers: {
         "Content-Type": "application/json",
       },
       withCredentials: true
     })
+    
+    if(contactDeleted.status === 200) {
+      setIsAllContacts((prevContacts) => prevContacts.filter((c: Contact) => c.id !== contact.id));
+      toast.success("Contact Deleted Successfully", {
+        duration: 2000,
+      })
+    }
+    else {
+      toast.error("Unable to delete contact", {
+        duration: 2000,
+      });
+    }
+
   }
 
   return (
-    <div style={{position:'absolute', left:'20px', height: '100%'}}>
-      <h2 style={{left: '0', top: '10px'}}>All Contacts</h2>
-      <ul style={{left: '1px', padding: '0px'}}>
-        {allContacts.map((contact: Contact) => (
-         <div className='contactListDiv'>
-          <li className='contactli' key={contact.id} onClick={() => handleContact(contact)} >{contact.name} </li>
+  <div className="AllContacts">
+    <h2>All Contacts</h2>
+    <ul>
+      {allContacts.map((contact: Contact) => (
+        <div className="contactListDiv" key={contact.id}>
+          <li className="contactli" onClick={() => handleContact(contact)}>
+            {contact.name}
+          </li>
           <div onClick={() => handleContactDelete(contact)}>
-          <DeleteIcon />
+            <DeleteIcon />
           </div>
-         </div>
-        ))}
-      </ul>
-    </div>
-    // allContacts.map((item: any) => {
-    //   <div className='AllContact'>
-    //   <div className='contactImage'>image</div>
-    //   <div className='contactName'>name</div>
-    // </div>
-    // })
-  )
+        </div>
+      ))}
+    </ul>
+  </div>
+);
+
 }
 
 export default AllContacts

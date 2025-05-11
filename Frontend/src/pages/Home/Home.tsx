@@ -1,27 +1,29 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import "./Home.css";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { Avatar } from "@mui/material";
-import SearchIcon from "@mui/icons-material/Search";
-import DuoIcon from "@mui/icons-material/Duo";
-import InsertEmoticonIcon from "@mui/icons-material/InsertEmoticon";
-import AddIcon from "@mui/icons-material/Add";
-import AddCommentIcon from "@mui/icons-material/AddComment";
-import SendIcon from "@mui/icons-material/Send";
 import axios from "axios";
-// import App from "../../App";
 import { Socket, io } from "socket.io-client";
 import AddNewContact from "../../pages/AddNewContact/AddNewContact";
-import ClearIcon from "@mui/icons-material/Clear";
 import AllContacts from "../../pages/AllContacts/AllContacts";
 import { GlobalStateContext } from "../../components/ContextApi/GlobalStateProvide";
 import { User } from "../../Interface/userInterface/user";
 import { Contact } from "../../Interface/contactInterface/NewContactInterface";
 import { MessageInterface } from "../../Interface/chatInterface";
-import DoneAllIcon from "@mui/icons-material/DoneAll";
-import { getRandomEmoji } from "../../components/Emojis";
-import Speech from "../../components/SpeechRecognition";
 import Picker, { EmojiClickData } from "emoji-picker-react";
+import { useDebounce } from 'use-debounce'; 
+import { 
+  MessageSquare, 
+  MoreVertical, 
+  Search, 
+  Video, 
+  Smile, 
+  Paperclip, 
+  Send, 
+  Mic, 
+  X, 
+  CheckCheck
+} from 'lucide-react';
+import Speech from "../../components/SpeechRecognition";
 
 const Home = () => {
   const [results, setResult] = useState<MessageInterface>();
@@ -36,21 +38,55 @@ const Home = () => {
   const [vertIconClick, setVertIconClick] = useState(false);
   const socket = useRef<Socket | null>(null);
   const [speechToggle, setSpeechToggle] = useState(false);
-  // const socket = io("http://localhost:8000");
+  const [isMobileView, setIsMobileView] = useState(window.innerWidth <= 768);
+  const [showChatPanel, setShowChatPanel] = useState(false);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearch] = useDebounce(searchQuery, 300);
+
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleIconClick = () => {
     if (fileInputRef.current) {
-      fileInputRef.current.click(); // Trigger the hidden file input's click event
+      fileInputRef.current.click();
     }
   };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files.length > 0) {
       const selectedFile = event.target.files[0];
-      console.log("Selected file:", selectedFile); // Handle the selected file
+      console.log("Selected file:", selectedFile);
     }
+  };
+  
+  // Add responsive layout handling
+  useEffect(() => {
+    const handleResize = () => {
+      const mobileView = window.innerWidth <= 768;
+      setIsMobileView(mobileView);
+      
+      // On larger screens, always show both panels
+      if (!mobileView) {
+        setShowChatPanel(true);
+      }
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Select contact handler for mobile
+  const handleContactSelect = (contact: Contact) => {
+    setSelectedContact(contact);
+    if (isMobileView) {
+      setShowChatPanel(true);
+    }
+  };
+  
+  // Back button handler for mobile
+  const handleBackToContacts = () => {
+    setShowChatPanel(false);
   };
 
   useEffect(() => {
@@ -70,12 +106,19 @@ const Home = () => {
           ? `${user.id}_${selectedContact.contactId}`
           : `${selectedContact.contactId}_${user.id}`;
 
-      console.log("Generated Room ID:", roomId); // Debugging output
       socket.current?.emit("join-room", roomId);
     }
   }, [user, selectedContact]);
 
+  // Scroll to bottom whenever new messages arrive
+  useEffect(() => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
+  }, [results?.messages]);
+
   function handleClick() {
+     if (!message.trim()) return;
     if (user?.id && selectedContact?.id) {
       const roomId =
         String(user.id) < String(selectedContact.contactId)
@@ -96,25 +139,10 @@ const Home = () => {
       setMessage("");
     }
   }
+
   useEffect(() => {
     if (user?.id && selectedContact?.contactId) {
       socket.current?.on("emit-message", (newMessage) => {
-        // if (newMessage?.selectedContact?.userId === user?.id) {
-        //   const ul = document.getElementsByClassName('msgss')
-        //   const li = document.createElement('li')
-        //   li.className = 'sender'
-        //   li.textContent = newMessage?.content
-        //   ul[0].appendChild(li)
-        // }
-
-        // if (newMessage?.selectedContact?.contactId === user?.id) {
-        //   const ul = document.getElementsByClassName('msgss')
-        //   const li = document.createElement('li')
-        //   li.className = 'receiver'
-        //   li.textContent = newMessage?.content
-        //   ul[0].appendChild(li)
-        // }
-
         setResult((oldResult) => {
           const newResult = structuredClone(oldResult) || {};
 
@@ -183,37 +211,6 @@ const Home = () => {
         if (result) {
           setResult(result.data);
         }
-
-        // result?.data?.messages.forEach((item: ChatInterface) => {
-        //   if (item?.senderId === user?.id) {
-        //     const ul = document.getElementsByClassName('msgss')
-        //     const li = document.createElement('li')
-        //     li.className = 'sender'
-        //     const span = document.createElement('span')
-        //     span.className = 'senderSpan'
-        //     const createdAtDate = new Date(item.createdAt);
-
-        //     // Format the time as "hh:mm AM/PM"
-        //     const formattedTime = createdAtDate.toLocaleTimeString('en-US', {
-        //       hour: '2-digit',
-        //       minute: '2-digit',
-        //       hour12: true,
-        //     });
-
-        //     span.textContent = formattedTime;
-        //     li.appendChild(span)
-        //     li.textContent = item?.content
-        //     ul[0].appendChild(li)
-        //   }
-
-        //   if (item?.receiverId === user?.id) {
-        //     const ul = document.getElementsByClassName('msgss')
-        //     const li = document.createElement('li')
-        //     li.className = 'receiver'
-        //     li.textContent = item?.content
-        //     ul[0].appendChild(li)
-        //   }
-        // })
       };
       fetchData();
     }
@@ -226,108 +223,114 @@ const Home = () => {
 
   const onEmojiClick = (emojiObject: EmojiClickData) => {
     setMessage((prevMsg) => prevMsg + emojiObject.emoji);
+    if (isMobileView) {
+      setselectEmoji(false);
+    }
   };
 
+  const filteredContacts = allContacts?.filter((contact) =>
+    contact.name.toLowerCase().includes(debouncedSearch.toLowerCase())
+  );
+
   const { avatar } = context;
-  console.log(avatar);
+
+  // Temporary function until actual implementation is provided
+  const getRandomEmoji = () => {
+    const emojis = ["🙂", "😊", "🎉", "👋", "💬", "✨", "🔥", "👍"];
+    return emojis[Math.floor(Math.random() * emojis.length)];
+  };
 
   const boyProfilePic = `https://avatar.iran.liara.run/public/boy?username=${
     selectedContact?.name ? selectedContact?.name : "username"
   }`;
+
   return (
     <div className="home">
-      {/* Upper Panel  */}
-      <div className="homeleft">
+      {/* Left Panel - Contacts */}
+      <div className={`homeleft ${isMobileView && showChatPanel ? 'hidden' : ''}`}>
         <div className="leftUpperPanel">
           <h2>Chats</h2>
           <div className="sidebar">
-            <AddCommentIcon
-              color="action"
-              className="add"
-              sx={{ height: "4vh", width: "4vh" }}
-            />
-            <div
-              onClick={() => setVertIconClick(!vertIconClick)}
-              className="MoreVertIcon"
-            >
-              <MoreVertIcon sx={{ height: "4vh", width: "4vh" }} />
-              {vertIconClick ? (
+            <MessageSquare className="add-icon" />
+            <div className="more-icon-container" onClick={() => setVertIconClick(!vertIconClick)}>
+              <MoreVertical className="more-icon" />
+              {vertIconClick && (
                 <div className="vertIconSelectBox">
-                  <div
-                    className="vertIconItems"
-                    onClick={() => setIsOpen(!isOpen)}
-                  >
+                  <div className="vertIconItems" onClick={() => setIsOpen(!isOpen)}>
                     Add new contact
                   </div>
                   <div className="vertIconItems">Theme</div>
                   <div className="vertIconItems">Settings</div>
-                  <div
-                    className="vertIconItems"
-                    onClick={() => setIsAllContact(!isAllContact)}
-                  >
+                  <div className="vertIconItems" onClick={() => setIsAllContact(!isAllContact)}>
                     All Contacts
                   </div>
                 </div>
-              ) : (
-                ""
               )}
             </div>
           </div>
         </div>
+        
         <div className="leftSearch">
-          <input type="text" placeholder=" Search" />
+          <Search className="search-icon" />
+          <input
+            type="text"
+            placeholder="Search"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
         </div>
+        
         <div className="leftFilter">
-          <p>All</p>
-          <p>Unread</p>
-          <p>Favourites</p>
-          <p>Groups</p>
+          <button className="filter-active">All</button>
+          <button>Unread</button>
+          <button>Favourites</button>
+          <button>Groups</button>
         </div>
+        
         <div className="leftBottomPanel">
-          {allContacts && allContacts?.length > 0 ? (
-            allContacts?.map((contact: Contact) => {
-              return (
-                <div
-                  className="contactList"
-                  onClick={() => setSelectedContact(contact)}
-                >
-                  <span className="contactListDp">
-                    <Avatar
-                      src={boyProfilePic}
-                      alt="User"
-                      sx={{ height: "4vh", width: "4vh" }}
-                    />
-                  </span>
+          {filteredContacts && filteredContacts.length > 0 ? (
+            filteredContacts.map((contact: Contact, index) => (
+              <div
+                key={index}
+                className={`contactList ${selectedContact?.id === contact.id ? 'active' : ''}`}
+                onClick={() => handleContactSelect(contact)}
+              >
+                <span className="contactListDp">
+                  <Avatar
+                    src={`https://avatar.iran.liara.run/public/boy?username=${contact?.name}`}
+                    alt={contact?.name}
+                  />
+                </span>
+                <div className="contactListInfo">
                   <span className="contactListName">{contact?.name}</span>
+                  <span className="contactListLastMessage">Tap to chat</span>
+                </div>
+                <div className="contactListMeta">
+                  <span className="contactListTime">Now</span>
                   <span className="contactListEmoji">{emoji}</span>
                 </div>
-              );
-            })
+              </div>
+            ))
           ) : (
-            <div>No Contacts Added</div>
+            <div className="no-contacts">
+              <p>No Contacts</p>
+              <button className="add-contact-btn" onClick={() => setIsOpen(true)}>
+                Add Contact
+              </button>
+            </div>
           )}
         </div>
 
-        {isOpen ? (
+        {isOpen && (
           <div className="AddNewContact">
-            <div
-              onClick={() => setIsOpen(!isOpen)}
-              style={{ position: "absolute", right: "30px", top: "30px" }}
-            >
-              <ClearIcon />
-            </div>
             <AddNewContact user={user} setIsOpen={setIsOpen} />
           </div>
-        ) : (
-          ""
         )}
-        {isAllContact ? (
+        
+        {isAllContact && (
           <div className="AllContacts">
-            <div
-              onClick={() => setIsAllContact(!isAllContact)}
-              style={{ position: "absolute", right: "30px", top: "30px" }}
-            >
-              <ClearIcon />
+            <div className="close-btn" onClick={() => setIsAllContact(false)}>
+              <X size={24} />
             </div>
             <AllContacts
               user={user}
@@ -335,36 +338,46 @@ const Home = () => {
               setSelectedContact={setSelectedContact}
             />
           </div>
-        ) : null}
+        )}
       </div>
 
-      <div className="homeright">
+      {/* Right Panel - Chat */}
+      <div className={`homeright ${isMobileView && !showChatPanel ? 'hidden' : ''}`}>
         <div className="upperPanel">
+          <div style={{ display: "flex" }}>
+            {isMobileView && (
+            <button className="back-button" onClick={handleBackToContacts}>
+              <X size={24} />
+            </button>
+          )}
+          
           <div className="upperPanelRight">
             <Avatar
               src={boyProfilePic}
               alt="User"
-              sx={{ height: "5vh", width: "5vh" }}
             />
-            <h3>
-              {selectedContact?.name ? selectedContact?.name : "User Name"}
-            </h3>
+            <div className="user-info">
+              <h3>{selectedContact?.name || "Select a contact"}</h3>
+              <p className="user-status">
+                {selectedContact ? "Online" : "No contact selected"}
+              </p>
+            </div>
           </div>
+          </div>
+          
           <div className="upperPanelLeft">
-            <DuoIcon color="action" sx={{ height: "4vh", width: "4vh" }} />
-            <SearchIcon sx={{ height: "4vh", width: "4vh" }} />
-            <MoreVertIcon sx={{ height: "4vh", width: "4vh" }} />
+            <Video className="panel-icon" />
+            <Search className="panel-icon" />
+            <MoreVertical className="panel-icon" />
           </div>
         </div>
 
-        {/* Middel Panel For Messages */}
-        <div className="rightMiddlePanel">
-          <ul className="msgss">
-            {results?.messages?.map((message, index) => {
-              if (message?.senderId === user?.id) {
+        {/* Middle Panel For Messages */}
+        <div className="rightMiddlePanel" ref={chatContainerRef}>
+          {selectedContact ? (
+            <ul className="msgss">
+              {results?.messages?.map((message, index) => {
                 const createdAtDate = new Date(message.createdAt);
-
-                // Format the time as "hh:mm AM/PM"
                 const formattedTime = createdAtDate.toLocaleTimeString(
                   "en-US",
                   {
@@ -374,104 +387,94 @@ const Home = () => {
                   }
                 );
 
-                return (
-                  <li className="sender">
-                    <div key={index}>
-                      <span>{message.content}</span>
-                      <span className="messageTime">{formattedTime}</span>
-                      <span>
-                        <DoneAllIcon style={{ height: "13px" }} />
-                      </span>
-                    </div>
-                  </li>
-                );
-              }
-              if (message?.receiverId === user?.id) {
-                const createdAtDate = new Date(message.createdAt);
-
-                // Format the time as "hh:mm AM/PM"
-                const formattedTime = createdAtDate.toLocaleTimeString(
-                  "en-US",
-                  {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    hour12: true,
-                  }
-                );
-
-                return (
-                  <li className="receiver">
-                    <div key={index}>
-                      <span>{message.content}</span>
-                      <span className="messageTime">{formattedTime}</span>
-                      <span>
-                        <DoneAllIcon style={{ height: "13px" }} />
-                      </span>
-                    </div>
-                  </li>
-                );
-              }
-            })}
-          </ul>
-          {selectEmoji ? (
+                if (message?.senderId === user?.id) {
+                  return (
+                    <li key={index} className="sender">
+                      <div className="message-content">
+                        <span className="message-text">{message.content}</span>
+                        <div className="message-meta">
+                          <span className="messageTime">{formattedTime}</span>
+                          <CheckCheck size={14} className="read-receipt" />
+                        </div>
+                      </div>
+                    </li>
+                  );
+                } else {
+                  return (
+                    <li key={index} className="receiver">
+                      <div className="message-content">
+                        <span className="message-text">{message.content}</span>
+                        <span className="messageTime">{formattedTime}</span>
+                      </div>
+                    </li>
+                  );
+                }
+              })}
+            </ul>
+          ) : (
+            <div className="no-chat-selected">
+              <div className="no-chat-content">
+                <MessageSquare size={64} className="no-chat-icon" />
+                <h3>No chat selected</h3>
+                <p>Select a contact to start chatting</p>
+              </div>
+            </div>
+          )}
+          
+          {selectEmoji && (
             <div className="emojiPicker">
               <Picker
                 onEmojiClick={onEmojiClick}
-                width="300px"
+                width={isMobileView ? "300px" : "350px"}
                 height="350px"
               />
             </div>
-          ) : (
-            ""
           )}
         </div>
-        <div className="rightBottomPanel">
-          <div className="icons">
-            <div onClick={() => setselectEmoji(!selectEmoji)}>
-              <InsertEmoticonIcon
-                sx={{ height: "4vh", width: "4vh" }}
-                className="InsertEmoticonIcon"
-              />
-            </div>
-            <AddIcon
-              sx={{ height: "4vh", width: "4vh" }}
-              className="AddIcon"
-              onClick={handleIconClick}
-            />
-            <input
-              type="file"
-              accept="image/*"
-              ref={fileInputRef}
-              style={{ display: "none" }} // Hide the input
-              onChange={handleFileChange}
-            />
-          </div>
-          <input
-            type="text"
-            placeholder="Type a message"
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                handleClick();
-              }
-            }}
-          />
-          {message === "" || speechToggle ? (
-            <div onClick={() => setSpeechToggle(!speechToggle)}>
-              <Speech speechToggle={speechToggle} setMessage={setMessage} />
-            </div>
-          ) : (
-            !speechToggle && (
-              <span onClick={handleClick}>
-                <SendIcon
-                  sx={{ height: "4vh", width: "4vh" }}
-                  className="SendIcon" // Call your send message function on click
+        
+        {selectedContact && (
+          <div className="rightBottomPanel">
+            <div className="message-input-container">
+              <div className="icons">
+                <button className="icon-btn" onClick={() => setselectEmoji(!selectEmoji)}>
+                  <Smile className="message-icon" />
+                </button>
+                <button className="icon-btn" onClick={handleIconClick}>
+                  <Paperclip className="message-icon" />
+                </button>
+                <input
+                  type="file"
+                  accept="image/*"
+                  ref={fileInputRef}
+                  style={{ display: "none" }}
+                  onChange={handleFileChange}
                 />
-              </span>
-            )
-          )}
-        </div>
+              </div>
+              
+              <input
+                type="text"
+                placeholder="Type a message"
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    handleClick();
+                  }
+                }}
+              />
+              
+              {message === "" || speechToggle ? (
+                <button className="send-btn" onClick={() => setSpeechToggle(!speechToggle)}>
+                  <Speech speechToggle={speechToggle} setMessage={setMessage} />
+                </button>
+              ) : (
+                <button className="send-btn" onClick={handleClick}>
+                  <Send className="send-icon" />
+                </button>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

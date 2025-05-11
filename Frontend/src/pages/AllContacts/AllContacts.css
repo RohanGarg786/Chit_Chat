@@ -1,24 +1,89 @@
-.AllContact {
-    display: flex;
-    flex-direction: row;
+.AllContacts {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 90%;
+  max-width: 400px;
+  height: 100vh;
+  background-color: #ffffff;
+  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+  overflow-y: auto;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+}
+
+.AllContacts h2 {
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+  color: #333;
+  text-align: center;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.contactListDiv {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  padding: 0.8rem 1rem;
+  margin-bottom: 0.7rem;
+  transition: background-color 0.2s ease;
+}
+
+.contactListDiv:hover {
+  background-color: #e9f5ff;
 }
 
 .contactli {
-    color: rgb(52, 51, 51);
-    padding: 10px;
-    list-style: none;
-    min-width: 200px;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #333;
+  cursor: pointer;
+  flex: 1;
 }
-.contactListDiv {
-    display: flex;
-    flex-direction: row;
-    margin-top: 10px;
-    background-color: rgb(198, 210, 203);
-    width: 300px;
-    left: 0;
-    border-radius: 20px;
-    border: 1px solid #ddd;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-    justify-content: space-between;
-    align-items: center;
+
+.contactli:hover {
+  text-decoration: underline;
+}
+
+.contactListDiv svg {
+  cursor: pointer;
+  color: #ff5c5c;
+  transition: transform 0.2s ease;
+}
+
+.contactListDiv svg:hover {
+  transform: scale(1.1);
+}
+
+.close-btn {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  cursor: pointer;
+  color: #555;
+  z-index: 1001;
+}
+
+@media screen and (max-width: 768px) {
+  .AllContacts {
+    width: 100%;
+    padding: 1rem;
+  }
+
+  .contactli {
+    font-size: 0.95rem;
+  }
+
+  .contactListDiv {
+    padding: 0.7rem;
+  }
 }

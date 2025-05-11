@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import "./Register.css";
 import { GlobalStateContext } from "../../components/ContextApi/GlobalStateProvide";
+import toast from "react-hot-toast";
 
 const Register = () => {
   const [name, setName] = React.useState<string>("");
@@ -41,18 +42,35 @@ const Register = () => {
 
   const submitHandler = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const response = await axios.post(
-      `${import.meta.env.VITE_BACKEND_URL}/api/v1/user/register`,
-      { name, phone, password, avatar },
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
+    try {
+        const response = await axios.post(
+        `${import.meta.env.VITE_BACKEND_URL}/api/v1/user/register`,
+        { name, phone, password, avatar },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
-    if (response) {
-      navigate("/login");
+      if (response.status === 200) {
+        toast.success("Registration Successful", {
+          duration: 2000,
+        });
+        navigate("/login");
+      }
+      else {
+        toast.error("Registration Failed", {
+          duration: 2000,
+        });
+      }
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        const message = error?.response?.data?.message || "Something went wrong";
+        toast.error(message, { duration: 2000 });
+      } else {
+        toast.error("An unexpected error occurred");
+      }
     }
   };
 

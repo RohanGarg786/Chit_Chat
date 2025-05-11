@@ -4,6 +4,7 @@ import React, { FormEvent, useContext, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import './Login.css'
 import { GlobalStateContext } from '../../components/ContextApi/GlobalStateProvide';
+import toast from 'react-hot-toast';
 
 const Login = () => {
     const [phone,setPhone] =React.useState<string>("");
@@ -20,23 +21,33 @@ const Login = () => {
 
     const loginHandler = async (e: FormEvent<HTMLFormElement>)=>{
         e.preventDefault();
-       const response =  await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/user/login`,{phone,password},{
-            headers:{
-                'Content-Type':'application/json'
-            },
-            withCredentials: true // Allows cookies to be sent and received
-        })
-        // const { token } = response.data;
+        try {
+            const response = await axios.post(
+            `${import.meta.env.VITE_BACKEND_URL}/api/v1/user/login`,
+            { phone, password },
+            {
+                headers: {
+                'Content-Type': 'application/json'
+                },
+                withCredentials: true
+            }
+            );
 
-        const {token} = response.data
-        
-        if (token) {
-            // Set the token in cookies for future requests
-           await setIsAuthenticated(true); // Update your authentication state
-            // Redirect the user to the home page
-            navigate('/') // Adjust according to your routing library
+            if (response?.status === 200) {
+            await setIsAuthenticated(true);
+            toast.success("Login Successful", {
+                duration: 2000,
+            });
+            navigate('/');
+            }
+        } catch (error: any) {
+           if (axios.isAxiosError(error)) {
+                const message = error.response?.data?.message || "Invalid Credentials";
+                toast.error(message, { duration: 2000 });
+            } else {
+                toast.error("An unexpected error occurred");
+            }
         }
-
     }
     useEffect(() => {
         console.log("Authentication status changed:", isAuthenticated);

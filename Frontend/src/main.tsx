@@ -7,7 +7,7 @@ import { GlobalStateProvider } from './components/ContextApi/GlobalStateProvide.
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
    <GlobalStateProvider>
-   <Toaster/>
+   <Toaster  position="top-right" reverseOrder={false}/>
    <App />
    </GlobalStateProvider>
   </StrictMode>,

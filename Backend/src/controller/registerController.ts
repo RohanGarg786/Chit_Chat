@@ -74,7 +74,7 @@ export const loginUserController = async(req:Request, res: Response): Promise<an
         if(!user){
             return res.status(400).json({
                 success:false,
-                message:user
+                message:"User not found, please register first"
             })
         }
 
@@ -95,7 +95,7 @@ export const loginUserController = async(req:Request, res: Response): Promise<an
             expires: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000), // 1 day
           };
 
-        return res.status(201).cookie("token",token,options).json({
+        return res.status(200).cookie("token",token,options).json({
             success:true,
             message:"User loggin successfully",
             token:token
