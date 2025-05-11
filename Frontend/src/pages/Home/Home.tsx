@@ -19,7 +19,6 @@ import {
   Smile, 
   Paperclip, 
   Send, 
-  Mic, 
   X, 
   CheckCheck
 } from 'lucide-react';
@@ -232,7 +231,7 @@ const Home = () => {
     contact.name.toLowerCase().includes(debouncedSearch.toLowerCase())
   );
 
-  const { avatar } = context;
+  // const { avatar } = context;
 
   // Temporary function until actual implementation is provided
   const getRandomEmoji = () => {
