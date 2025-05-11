@@ -302,9 +302,6 @@
   background-image: url('https://web.whatsapp.com/img/bg-chat-tile-light_686b98c9fdffef3f.png');
   background-repeat: repeat;
   position: relative;
-  /* Add padding-bottom to ensure messages aren't covered by the rightBottomPanel */
-  padding-bottom: 90px; /* Adjust this based on the height of rightBottomPanel */
-  box-sizing: border-box;
 }
 
 .msgss {
@@ -396,8 +393,7 @@
 
 /* Message Input Area */
 .rightBottomPanel {
- position: fixed;
-  bottom: 0;
+ position: static;
   width: 100%;
   background-color: white;
   padding: 12px;
