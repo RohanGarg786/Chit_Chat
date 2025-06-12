@@ -117,26 +117,22 @@ const Home = () => {
   }, [results?.messages]);
 
   function handleClick() {
-     if (!message.trim()) return;
+    if (!message.trim()) return;
     if (user?.id && selectedContact?.id) {
       const roomId =
         String(user.id) < String(selectedContact.contactId)
           ? `${user.id}_${selectedContact.contactId}`
           : `${selectedContact.contactId}_${user.id}`;
-
-      socket.current?.emit("join-room", roomId);
+  
+      socket.current?.emit("join-room", roomId); // Join the room
       const timeStamp = new Date().toISOString();
-      socket.current?.emit(
-        "send-message",
-        {
-          selectedContact: selectedContact,
-          content: message,
-          timeStamp: timeStamp,
-        },
-        roomId
-      );
-      setMessage("");
+      socket.current?.emit("send-message", {
+        selectedContact: { userId: user.id, contactId: selectedContact.contactId },
+        content: message,
+        timeStamp: timeStamp,
+      });
     }
+    setMessage("")
   }
 
   useEffect(() => {

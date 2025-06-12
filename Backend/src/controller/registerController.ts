@@ -90,8 +90,8 @@ export const loginUserController = async(req:Request, res: Response): Promise<an
         const token = await createToken(data.phone);
         const options = {
             httpOnly: true,                     // Not accessible via JS (more secure)
-            secure: true,                       // Only sent over HTTPS (Render uses HTTPS)
-            sameSite: 'none' as const, // ✅ lowercase 'none'
+            secure:  process.env.NODE_ENV === 'production',                       // Only sent over HTTPS (Render uses HTTPS)
+            sameSite: process.env.NODE_ENV === 'production' ? 'none' as const : 'lax' as const, // ✅ lowercase 'none'
             expires: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000), // 1 day
           };
 

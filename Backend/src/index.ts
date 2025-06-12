@@ -34,52 +34,59 @@ io.on("connection",(socket)=>{
         console.log(`User joined room: ${roomId}`);
     });
 
-    socket.on('send-message',async(message,roomId)=> {
-       io.to(roomId).emit('emit-message',message)
+    socket.on('send-message',async(message)=> {
+        const roomId =
+        String(message.selectedContact.userId) < String(message.selectedContact.contactId)
+            ? `${message.selectedContact.userId}_${message.selectedContact.contactId}`
+            : `${message.selectedContact.contactId}_${message.selectedContact.userId}`;
 
-    const a  = await prisma.chats.findFirst({
-        where: {
-            AND: [
-              { memebers: { has: message?.selectedContact?.userId } },
-              { memebers: { has: message?.selectedContact?.contactId } },
-            ],
-          },
-    })
+        // Emit the message to the specific room
+        io.to(roomId).emit("emit-message", message);
 
-    console.log(a)
-    if(!a) {
-        const result = await prisma.chats.create({
-            data: {
-                memebers: [message?.selectedContact?.userId, message?.selectedContact?.contactId]
-            }
-        })
 
-        const r = await prisma.messages.create({
-            data: {
-                senderId: message?.selectedContact?.userId,
-                receiverId: message?.selectedContact?.contactId,
-                content: message?.content,
-                chatsId: result?.id
-            }
-        })
-    }
-    else{ 
-        const r1 = await prisma.messages.create({
-            data: {
-                senderId: message?.selectedContact?.userId,
-                receiverId: message?.selectedContact?.contactId,
-                content: message?.content,
-                chatsId: a?.id
-            }
-        })
-    }
-
-        const isExists = await prisma.meassages.findMany({
+        const a  = await prisma.chats.findFirst({
             where: {
-                senderId:message?.selectedContact?.userId,
-                receiverId:message?.selectedContact?.contactId,
-            }
+                AND: [
+                { memebers: { has: message?.selectedContact?.userId } },
+                { memebers: { has: message?.selectedContact?.contactId } },
+                ],
+            },
         })
+
+        console.log(a)
+        if(!a) {
+            const result = await prisma.chats.create({
+                data: {
+                    memebers: [message?.selectedContact?.userId, message?.selectedContact?.contactId]
+                }
+            })
+
+            const r = await prisma.messages.create({
+                data: {
+                    senderId: message?.selectedContact?.userId,
+                    receiverId: message?.selectedContact?.contactId,
+                    content: message?.content,
+                    chatsId: result?.id
+                }
+            })
+        }
+        else{ 
+            const r1 = await prisma.messages.create({
+                data: {
+                    senderId: message?.selectedContact?.userId,
+                    receiverId: message?.selectedContact?.contactId,
+                    content: message?.content,
+                    chatsId: a?.id
+                }
+            })
+        }
+
+            const isExists = await prisma.meassages.findMany({
+                where: {
+                    senderId:message?.selectedContact?.userId,
+                    receiverId:message?.selectedContact?.contactId,
+                }
+            })
     })
 });
 
