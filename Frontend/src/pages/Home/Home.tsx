@@ -10,18 +10,18 @@ import { User } from "../../Interface/userInterface/user";
 import { Contact } from "../../Interface/contactInterface/NewContactInterface";
 import { MessageInterface } from "../../Interface/chatInterface";
 import Picker, { EmojiClickData } from "emoji-picker-react";
-import { useDebounce } from 'use-debounce'; 
-import { 
-  MessageSquare, 
-  MoreVertical, 
-  Search, 
-  Video, 
-  Smile, 
-  Paperclip, 
-  Send, 
-  X, 
-  CheckCheck
-} from 'lucide-react';
+import { useDebounce } from "use-debounce";
+import {
+  MessageSquare,
+  MoreVertical,
+  Search,
+  Video,
+  Smile,
+  Paperclip,
+  Send,
+  X,
+  CheckCheck,
+} from "lucide-react";
 import Speech from "../../components/SpeechRecognition";
 
 const Home = () => {
@@ -42,8 +42,7 @@ const Home = () => {
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearch] = useDebounce(searchQuery, 300);
-
-
+  const [hoveredMessageId, setHoveredMessageId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleIconClick = () => {
@@ -58,21 +57,47 @@ const Home = () => {
       console.log("Selected file:", selectedFile);
     }
   };
-  
+
+  const handleDeleteMessage = async (messageId: string) => {
+    try {
+      const response = await axios.delete(
+        `${
+          import.meta.env.VITE_BACKEND_URL
+        }/api/v1/user/deleteMessage/${messageId}`
+      );
+      if (response.status === 200) {
+        // Remove the message from the UI
+        setResult((oldResult) => {
+          const newResult = structuredClone(oldResult) || { messages: [] };
+          newResult.messages = newResult?.messages?.filter(
+            (msg) => msg.id !== messageId
+          );
+          return newResult;
+        });
+      }
+    } catch (error) {
+      console.error("Failed to delete message:", error);
+    }
+  };
+
+  const isDeletable = (createdAt?: string) => {
+    if (!createdAt) return false; // If createdAt is undefined, return false
+    return new Date(createdAt) > new Date(Date.now() - 60 * 60 * 1000);
+  };
   // Add responsive layout handling
   useEffect(() => {
     const handleResize = () => {
       const mobileView = window.innerWidth <= 768;
       setIsMobileView(mobileView);
-      
+
       // On larger screens, always show both panels
       if (!mobileView) {
         setShowChatPanel(true);
       }
     };
-    
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   // Select contact handler for mobile
@@ -82,7 +107,7 @@ const Home = () => {
       setShowChatPanel(true);
     }
   };
-  
+
   // Back button handler for mobile
   const handleBackToContacts = () => {
     setShowChatPanel(false);
@@ -112,7 +137,8 @@ const Home = () => {
   // Scroll to bottom whenever new messages arrive
   useEffect(() => {
     if (chatContainerRef.current) {
-      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+      chatContainerRef.current.scrollTop =
+        chatContainerRef.current.scrollHeight;
     }
   }, [results?.messages]);
 
@@ -123,57 +149,73 @@ const Home = () => {
         String(user.id) < String(selectedContact.contactId)
           ? `${user.id}_${selectedContact.contactId}`
           : `${selectedContact.contactId}_${user.id}`;
-  
+
       socket.current?.emit("join-room", roomId); // Join the room
       const timeStamp = new Date().toISOString();
       socket.current?.emit("send-message", {
-        selectedContact: { userId: user.id, contactId: selectedContact.contactId },
+        selectedContact: {
+          userId: user.id,
+          contactId: selectedContact.contactId,
+        },
         content: message,
         timeStamp: timeStamp,
       });
     }
-    setMessage("")
+    setMessage("");
   }
 
   useEffect(() => {
     if (user?.id && selectedContact?.contactId) {
       socket.current?.on("emit-message", (newMessage) => {
-        setResult((oldResult) => {
-          const newResult = structuredClone(oldResult) || {};
+        // Ensure the message is for the currently selected contact
+        if (
+          (newMessage.selectedContact.userId === user.id &&
+            newMessage.selectedContact.contactId ===
+              selectedContact.contactId) ||
+          (newMessage.selectedContact.userId === selectedContact.contactId &&
+            newMessage.selectedContact.contactId === user.id)
+        ) {
+          setResult((oldResult) => {
+            const newResult = structuredClone(oldResult) || {};
 
-          if (!newResult.messages) {
-            newResult.messages = [];
-          }
+            if (!newResult.messages) {
+              newResult.messages = [];
+            }
 
-          newResult?.messages?.push({
-            chatsId: "",
-            content: newMessage.content,
-            createdAt: newMessage.timeStamp,
-            id: "",
-            isRead: false,
-            receiverId: newMessage.selectedContact.contactId,
-            senderId: newMessage.selectedContact.userId,
-            updatedAt: "",
+            newResult.messages.push({
+              chatsId: "",
+              content: newMessage.content,
+              createdAt: newMessage.timeStamp,
+              id: "",
+              isRead: false,
+              receiverId: newMessage.selectedContact.contactId,
+              senderId: newMessage.selectedContact.userId,
+              updatedAt: "",
+            });
+
+            return newResult;
           });
-
-          return newResult;
-        });
+        }
       });
-
-      return () => {
-        socket.current?.off("emit-message");
-      };
     }
-  }, [user, selectedContact, results]);
+
+    // Cleanup the event listener when the component unmounts or dependencies change
+    return () => {
+      socket.current?.off("emit-message");
+    };
+  }, [user, selectedContact]);
 
   useEffect(() => {
     const fetchData = async () => {
-      const data = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/v1/user`, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-        withCredentials: true,
-      });
+      const data = await axios.get(
+        `${import.meta.env.VITE_BACKEND_URL}/api/v1/user`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          withCredentials: true,
+        }
+      );
       setUser(data.data);
     };
     fetchData();
@@ -183,7 +225,9 @@ const Home = () => {
     if (user) {
       const fetchContacts = async () => {
         const result = await axios.get(
-          `${import.meta.env.VITE_BACKEND_URL}/api/v1/user/allContacts/${user?.id}`
+          `${import.meta.env.VITE_BACKEND_URL}/api/v1/user/allContacts/${
+            user?.id
+          }`
         );
 
         if (result) {
@@ -200,7 +244,9 @@ const Home = () => {
     if (user && selectedContact) {
       const fetchData = async () => {
         const result = await axios.get(
-          `${import.meta.env.VITE_BACKEND_URL}/api/v1/user/allMessages/${user?.id}/${selectedContact?.contactId}`
+          `${import.meta.env.VITE_BACKEND_URL}/api/v1/user/allMessages/${
+            user?.id
+          }/${selectedContact?.contactId}`
         );
 
         if (result) {
@@ -242,21 +288,32 @@ const Home = () => {
   return (
     <div className="home">
       {/* Left Panel - Contacts */}
-      <div className={`homeleft ${isMobileView && showChatPanel ? 'hidden' : ''}`}>
+      <div
+        className={`homeleft ${isMobileView && showChatPanel ? "hidden" : ""}`}
+      >
         <div className="leftUpperPanel">
           <h2>Chats</h2>
           <div className="sidebar">
             <MessageSquare className="add-icon" />
-            <div className="more-icon-container" onClick={() => setVertIconClick(!vertIconClick)}>
+            <div
+              className="more-icon-container"
+              onClick={() => setVertIconClick(!vertIconClick)}
+            >
               <MoreVertical className="more-icon" />
               {vertIconClick && (
                 <div className="vertIconSelectBox">
-                  <div className="vertIconItems" onClick={() => setIsOpen(!isOpen)}>
+                  <div
+                    className="vertIconItems"
+                    onClick={() => setIsOpen(!isOpen)}
+                  >
                     Add new contact
                   </div>
                   <div className="vertIconItems">Theme</div>
                   <div className="vertIconItems">Settings</div>
-                  <div className="vertIconItems" onClick={() => setIsAllContact(!isAllContact)}>
+                  <div
+                    className="vertIconItems"
+                    onClick={() => setIsAllContact(!isAllContact)}
+                  >
                     All Contacts
                   </div>
                 </div>
@@ -264,7 +321,7 @@ const Home = () => {
             </div>
           </div>
         </div>
-        
+
         <div className="leftSearch">
           <Search className="search-icon" />
           <input
@@ -274,20 +331,22 @@ const Home = () => {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
-        
+
         <div className="leftFilter">
           <button className="filter-active">All</button>
           <button>Unread</button>
           <button>Favourites</button>
           <button>Groups</button>
         </div>
-        
+
         <div className="leftBottomPanel">
           {filteredContacts && filteredContacts.length > 0 ? (
             filteredContacts.map((contact: Contact, index) => (
               <div
                 key={index}
-                className={`contactList ${selectedContact?.id === contact.id ? 'active' : ''}`}
+                className={`contactList ${
+                  selectedContact?.id === contact.id ? "active" : ""
+                }`}
                 onClick={() => handleContactSelect(contact)}
               >
                 <span className="contactListDp">
@@ -309,7 +368,10 @@ const Home = () => {
           ) : (
             <div className="no-contacts">
               <p>No Contacts</p>
-              <button className="add-contact-btn" onClick={() => setIsOpen(true)}>
+              <button
+                className="add-contact-btn"
+                onClick={() => setIsOpen(true)}
+              >
                 Add Contact
               </button>
             </div>
@@ -321,7 +383,7 @@ const Home = () => {
             <AddNewContact user={user} setIsOpen={setIsOpen} />
           </div>
         )}
-        
+
         {isAllContact && (
           <div className="AllContacts">
             <div className="close-btn" onClick={() => setIsAllContact(false)}>
@@ -337,29 +399,30 @@ const Home = () => {
       </div>
 
       {/* Right Panel - Chat */}
-      <div className={`homeright ${isMobileView && !showChatPanel ? 'hidden' : ''}`}>
+      <div
+        className={`homeright ${
+          isMobileView && !showChatPanel ? "hidden" : ""
+        }`}
+      >
         <div className="upperPanel">
           <div style={{ display: "flex" }}>
             {isMobileView && (
-            <button className="back-button" onClick={handleBackToContacts}>
-              <X size={24} />
-            </button>
-          )}
-          
-          <div className="upperPanelRight">
-            <Avatar
-              src={boyProfilePic}
-              alt="User"
-            />
-            <div className="user-info">
-              <h3>{selectedContact?.name || "Select a contact"}</h3>
-              <p className="user-status">
-                {selectedContact ? "Online" : "No contact selected"}
-              </p>
+              <button className="back-button" onClick={handleBackToContacts}>
+                <X size={24} />
+              </button>
+            )}
+
+            <div className="upperPanelRight">
+              <Avatar src={boyProfilePic} alt="User" />
+              <div className="user-info">
+                <h3>{selectedContact?.name || "Select a contact"}</h3>
+                <p className="user-status">
+                  {selectedContact ? "Online" : "No contact selected"}
+                </p>
+              </div>
             </div>
           </div>
-          </div>
-          
+
           <div className="upperPanelLeft">
             <Video className="panel-icon" />
             <Search className="panel-icon" />
@@ -384,12 +447,29 @@ const Home = () => {
 
                 if (message?.senderId === user?.id) {
                   return (
-                    <li key={index} className="sender">
+                    <li
+                      key={index}
+                      className="sender"
+                      onMouseEnter={() =>
+                        setHoveredMessageId(message.id || null)
+                      }
+                      onMouseLeave={() => setHoveredMessageId(null)}
+                    >
                       <div className="message-content">
                         <span className="message-text">{message.content}</span>
                         <div className="message-meta">
                           <span className="messageTime">{formattedTime}</span>
                           <CheckCheck size={14} className="read-receipt" />
+                          {hoveredMessageId === message.id &&
+                            isDeletable(message.createdAt) && (
+                              <button
+                                className="delete-button"
+                                onClick={() => handleDeleteMessage(message.id!)}
+                                title="Delete Message"
+                              >
+                                🗑️
+                              </button>
+                            )}
                         </div>
                       </div>
                     </li>
@@ -415,7 +495,7 @@ const Home = () => {
               </div>
             </div>
           )}
-          
+
           {selectEmoji && (
             <div className="emojiPicker">
               <Picker
@@ -426,12 +506,15 @@ const Home = () => {
             </div>
           )}
         </div>
-        
+
         {selectedContact && (
           <div className="rightBottomPanel">
             <div className="message-input-container">
               <div className="icons">
-                <button className="icon-btn" onClick={() => setselectEmoji(!selectEmoji)}>
+                <button
+                  className="icon-btn"
+                  onClick={() => setselectEmoji(!selectEmoji)}
+                >
                   <Smile className="message-icon" />
                 </button>
                 <button className="icon-btn" onClick={handleIconClick}>
@@ -445,7 +528,7 @@ const Home = () => {
                   onChange={handleFileChange}
                 />
               </div>
-              
+
               <input
                 type="text"
                 placeholder="Type a message"
@@ -457,9 +540,12 @@ const Home = () => {
                   }
                 }}
               />
-              
+
               {message === "" || speechToggle ? (
-                <button className="send-btn" onClick={() => setSpeechToggle(!speechToggle)}>
+                <button
+                  className="send-btn"
+                  onClick={() => setSpeechToggle(!speechToggle)}
+                >
                   <Speech speechToggle={speechToggle} setMessage={setMessage} />
                 </button>
               ) : (

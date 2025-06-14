@@ -274,3 +274,34 @@ export const checkAuthentication = async (req: any, res: any) => {
       res.status(401).json({ error: 'Invalid token' });
     }
   }
+
+  export const deleteMessage = async (req: any, res: any) => {
+    const { messageId } = req.params;
+    try {
+    const message = await prisma.messages.findUnique({
+        where: { id: messageId },
+      });
+  
+      if (!message) {
+        return res.status(404).json({ error: "Message not found" });
+      }
+  
+      const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+      if (new Date(message.createdAt) < oneHourAgo) {
+        return res.status(403).json({ error: "Cannot delete messages older than 1 hour" });
+      }
+  
+      await prisma.messages.delete({
+        where: { id: messageId },
+      });
+  
+      return res.status(200).json({ message: "Message deleted successfully" });
+
+    }
+    catch (error) {
+        return res.status(500).json({
+            success: false,
+            error: error
+        })
+    }
+  }
